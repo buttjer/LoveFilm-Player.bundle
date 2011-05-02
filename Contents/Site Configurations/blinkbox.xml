@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<site site="http://www.blinkbox.com/"
+	plugin="http://www.blinkbox.com/flash/*"
+	initialState="playing"
+	version="1.0"
+	identifier="com.plexapp.plugins.blinkbox">
+	
+	<!-- Playing -->
+	<state name="playing">
+		<event>
+        	<condition>
+				<frameLoaded/>
+			</condition>
+			
+        	<action>
+        		<!-- Do Nothing -->
+        	</action>
+    	</event>
+	</state>
+	
+</site>
