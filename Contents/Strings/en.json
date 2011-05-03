@@ -1,5 +1,6 @@
 {   
     "Title" : "blinkbox",
-    
+    "Movies" : "Movies",
+    "TVShows": "TV Shows",
     "Preferences": "Preferences"
 }

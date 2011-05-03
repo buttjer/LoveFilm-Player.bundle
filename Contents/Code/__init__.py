@@ -4,16 +4,11 @@ VIDEO_PREFIX = "/video/blinkbox"
 
 NAME = L('Title')
 
-ART = 'art-default.png'
+ART = 'art-default.jpg'
 ICON = 'icon-default.png'
-ICON_COMPUTER = 'icon-movie.png'
-ICON_USER = 'icon-user.png'
-ICON_SEARCH = 'icon-search.png'
 
 MOVIES_FREE = 'http://www.blinkbox.com/Movies/Free'
 TV_FREE = 'http://www.blinkbox.com/TV/Free'
-
-ERROR = MessageContainer('Network Error','A Network error has occurred')
 
 ####################################################################################################
 
@@ -40,13 +35,13 @@ def MainMenu():
     dir.Append(Function(
         DirectoryItem(
             MovieMenu,
-            "Movies")))
+            Locale.LocalString('Movies'))))
     
     # TV Shows
     dir.Append(Function(
         DirectoryItem(
             TVMenu,
-            "TV Shows")))
+            Locale.LocalString('TVShows'))))
     
     return dir
 
@@ -55,10 +50,15 @@ def MainMenu():
 ####################################################################################################
 
 # This is the main function for displaying all available free movies. 
-def MovieMenu(sender):
-    dir = MediaContainer(disabledViewModes=["Coverflow"], title1="Movies")
+def MovieMenu(sender, current_page = 0):
+    dir = MediaContainer(disabledViewModes=["Coverflow"], title1=Locale.LocalString('Movies'))
 
-    movies = HTTP.Request(MOVIES_FREE)
+    if current_page != 0:
+        dir.replaceParent = True
+    
+    # Request the appropriate page
+    free_movies_url = MOVIES_FREE + '?page=' + str(current_page + 1)
+    movies = HTTP.Request(free_movies_url)
     movies_free = HTML.ElementFromString(movies)
     
     movie_assets = movies_free.xpath("//div[@class='movieAsset']")
@@ -73,7 +73,15 @@ def MovieMenu(sender):
             subtitle = title_details['subtitle'],
             summary = title_details['description'],
             thumb = title_details['image']))
-
+    
+    next_page = movies_free.xpath("//a[@class='pag_forw bundle']")
+    if len(next_page) > 0:
+        dir.Append(Function(
+            DirectoryItem(
+                MovieMenu,
+                "Next"),
+            current_page = current_page + 1))
+    
     return dir
 
 # This function will parse a specific 'movieAsset' to determine the associated information about
@@ -130,13 +138,18 @@ def parseMovieTitle(item):
 
 # This function displays the top level menu for all availabe TV shows. When selected, it will then
 # display the available series.
-def TVMenu(sender):
-    dir = MediaContainer(disabledViewModes=["Coverflow"], title1="TV Shows")
+def TVMenu(sender, current_page = 0):
+    dir = MediaContainer(disabledViewModes = ["Coverflow"], title1 = Locale.LocalString('TVShows'))
 
-    movies = HTTP.Request(TV_FREE)
-    movies_free = HTML.ElementFromString(movies)
+    if current_page != 0:
+        dir.replaceParent = True
     
-    movie_assets = movies_free.xpath("//div[@class='movieAsset']")
+    # Request the appropriate page
+    free_tv_shows_url = TV_FREE + '?page=' + str(current_page + 1)
+    tv_shows = HTTP.Request(free_tv_shows_url)
+    tv_shows_free = HTML.ElementFromString(tv_shows)
+    
+    movie_assets = tv_shows_free.xpath("//div[@class='movieAsset']")
     for movie_asset in movie_assets:
 		
         title_details = parseTvTitle(movie_asset)
@@ -151,6 +164,14 @@ def TVMenu(sender):
             name = title_details['name'],
             url = title_details['url']))
 
+    next_page = tv_shows_free.xpath("//a[@class='pag_forw bundle']")
+    if len(next_page) > 0:
+        dir.Append(Function(
+            DirectoryItem(
+                TVMenu,
+                "Next"),
+            current_page = current_page + 1))
+    
     return dir
 
 # This function will parse a specific 'movieAsset' to determine the associated information about
