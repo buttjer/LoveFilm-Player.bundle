@@ -4,18 +4,32 @@
 	initialState="playing"
 	version="1.0"
 	identifier="com.plexapp.plugins.blinkbox">
-	
+    
 	<!-- Playing -->
 	<state name="playing">
 		<event>
         	<condition>
-				<frameLoaded/>
+				<command name="pause" />
 			</condition>
 			
         	<action>
-        		<!-- Do Nothing -->
+				<click x="24" y="393" />
+				<goto state="paused" />
         	</action>
     	</event>
+	</state>
+    
+	<!-- Paused -->
+	<state name="paused">
+		<event>
+			<condition>
+				<command name="play" />
+			</condition>
+			<action>
+				<click x="24" y="393" />
+				<goto state="playing" />
+			</action>
+		</event>
 	</state>
 	
 </site>
