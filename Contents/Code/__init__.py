@@ -19,7 +19,7 @@ TV_FREE = 'http://www.blinkbox.com/TV/Free'
 def Start():
     
     # Initialize the plugin
-    Plugin.AddPrefixHandler(VIDEO_PREFIX, MainMenu, Locale.LocalString('Title'), ICON, ART)
+    Plugin.AddPrefixHandler(VIDEO_PREFIX, MainMenu, L('Title'), ICON, ART)
     Plugin.AddViewGroup("Basic", viewMode = "InfoList", mediaType = "items")
     Plugin.AddViewGroup("Basic", viewMode = "List", mediaType = "items")
     
@@ -31,20 +31,20 @@ def Start():
 # This main function will setup the displayed items. This will depend if the user is currently
 # logged in.
 def MainMenu():
-    dir = MediaContainer(disabledViewModes=["Coverflow"], title1 = Locale.LocalString('Title'))
-    
+    dir = MediaContainer(disabledViewModes=["Coverflow"], title1 = L('Title'))
+               
     # Movies
     dir.Append(Function(
         DirectoryItem(
             MovieMenu,
-            Locale.LocalString('Movies'),
+            L('Movies'),
             thumb = R(FILMS))))
     
     # TV Shows
     dir.Append(Function(
         DirectoryItem(
             TVMenu,
-            Locale.LocalString('TVShows'),
+            L('TVShows'),
             thumb = R(TV_SHOWS))))
     
     return dir
@@ -55,7 +55,7 @@ def MainMenu():
 
 # This is the main function for displaying all available free movies. 
 def MovieMenu(sender, current_page = 0):
-    dir = MediaContainer(disabledViewModes=["Coverflow"], title1=Locale.LocalString('Movies'))
+    dir = MediaContainer(disabledViewModes=["Coverflow"], title1=L('Movies'))
 
     if current_page != 0:
         dir.replaceParent = True
@@ -143,7 +143,7 @@ def parseMovieTitle(item):
 # This function displays the top level menu for all availabe TV shows. When selected, it will then
 # display the available series.
 def TVMenu(sender, current_page = 0):
-    dir = MediaContainer(disabledViewModes = ["Coverflow"], title1 = Locale.LocalString('TVShows'))
+    dir = MediaContainer(disabledViewModes = ["Coverflow"], title1 = L('TVShows'))
 
     if current_page != 0:
         dir.replaceParent = True
@@ -160,13 +160,12 @@ def TVMenu(sender, current_page = 0):
         
         dir.Append(Function(
             DirectoryItem(
-                TVSeriesMenu,
+                TVSeasonMenu,
                 title_details['name'],
                 subtitle = title_details['subtitle'],
                 summary = title_details['description'],
                 thumb = title_details['image']),
-            name = title_details['name'],
-            url = title_details['url']))
+            title_details = title_details))
 
     next_page = tv_shows_free.xpath("//a[@class='pag_forw bundle']")
     if len(next_page) > 0:
@@ -225,8 +224,43 @@ def parseTvTitle(item):
     
     return parsed
 
-# This function displays the individual series available for a specified tv show.
-def TVSeriesMenu(sender, name = '', url = ''):
+# This function displays the available seasons for a specified tv show.
+def TVSeasonMenu(sender, title_details):
+    
+    url = title_details['url']
+
+    tv_seasons_string = HTTP.Request(url)
+    tv_seasons = HTML.ElementFromString(tv_seasons_string)
+
+    # If there is only one series which is available, we should simply return the different episodes immediately
+    tv_season_collection = tv_seasons.xpath("id('selectSeries')/a")
+    if len(tv_season_collection) == 1:
+        return TVEpisodeMenu(sender, title_details['name'], url = url)
+
+    dir = MediaContainer(disabledViewModes = ["Coverflow"], title1 = sender.title1, title2 = title_details['name'])
+            
+    for season in tv_season_collection:
+
+        # We shouldn't show the option to display all series.
+        if season.get('class') == "showAll":
+            continue
+        
+        season_number = season.xpath(".//text()")[0]
+        season_url = season.get('href')
+        
+        dir.Append(Function(DirectoryItem(
+            TVEpisodeMenu,
+            "%s %s" % (L("Season"), season_number),
+            subtitle = title_details['subtitle'],
+            summary = title_details['description'],
+            thumb = title_details['image']),
+            name = title_details['name'],
+            url = season_url))
+
+    return dir
+
+# This function displays the individual episodes available for a specified tv show.
+def TVEpisodeMenu(sender, name = '', url = ''):
     dir = MediaContainer(disabledViewModes = ["Coverflow"], title1 = sender.title1, title2 = name)
 
     tv_series_string = HTTP.Request(url)

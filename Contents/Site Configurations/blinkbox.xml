@@ -11,7 +11,7 @@
         	<condition>
 				<command name="pause" />
 			</condition>
-			
+
         	<action>
 				<click x="24" y="393" />
 				<goto state="paused" />
@@ -31,5 +31,5 @@
 			</action>
 		</event>
 	</state>
-	
+
 </site>
