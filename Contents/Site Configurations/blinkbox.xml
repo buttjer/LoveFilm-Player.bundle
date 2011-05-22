@@ -5,6 +5,8 @@
 	version="1.0"
 	identifier="com.plexapp.plugins.blinkbox">
     
+    <crop x="0" y="0" width="0" height="370" />
+    
 	<!-- Playing -->
 	<state name="playing">
 		<event>
