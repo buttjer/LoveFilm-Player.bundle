@@ -6,8 +6,6 @@ NAME = L('Title')
 
 ART = 'art-default.jpg'
 ICON = 'icon-default.png'
-TV_SHOWS = 'icon-tvshows.png'
-FILMS = 'icon-films.png'
 
 MOVIES_FREE = 'http://www.blinkbox.com/Movies/Free'
 TV_FREE = 'http://www.blinkbox.com/TV/Free'
@@ -38,14 +36,14 @@ def MainMenu():
         DirectoryItem(
             MovieMenu,
             L('Movies'),
-            thumb = R(FILMS))))
+            thumb = R(ICON))))
     
     # TV Shows
     dir.Append(Function(
         DirectoryItem(
             TVMenu,
             L('TVShows'),
-            thumb = R(TV_SHOWS))))
+            thumb = R(ICON))))
     
     return dir
 
