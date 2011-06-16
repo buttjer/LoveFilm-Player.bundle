@@ -27,19 +27,24 @@ def Start():
     MediaContainer.title1 = NAME
     MediaContainer.art = R(ART)
     MediaContainer.content = 'Items'
+    
+    DirectoryItem.thumb = R(ICON)
+
+    # Cache HTTP requests for up to a day
+    HTTP.CacheTime = CACHE_1DAY
 
 ####################################################################################################
 
 def MainMenu():
     dir = MediaContainer(viewGroup='InfoList')
     
-    dir.Append(Function(DirectoryItem(ListItems, "Action", thumb = R(ICON)), url = ACTION_URL))
-    dir.Append(Function(DirectoryItem(ListItems, "Children", thumb = R(ICON)), url = CHILDREN_URL))
-    dir.Append(Function(DirectoryItem(ListItems, "Comedy", thumb = R(ICON)), url = COMEDY_URL))
-    dir.Append(Function(DirectoryItem(ListItems, "Drama", thumb = R(ICON)), url = DRAMA_URL))
-    dir.Append(Function(DirectoryItem(ListItems, "Horror", thumb = R(ICON)), url = HORROR_URL))
-    dir.Append(Function(DirectoryItem(ListItems, "Thriller", thumb = R(ICON)), url = THRILLER_URL))
-    dir.Append(Function(DirectoryItem(ListItems, "TV", thumb = R(ICON)), url = TV_URL))
+    dir.Append(Function(DirectoryItem(ListItems, "Action"), url = ACTION_URL))
+    dir.Append(Function(DirectoryItem(ListItems, "Children"), url = CHILDREN_URL))
+    dir.Append(Function(DirectoryItem(ListItems, "Comedy"), url = COMEDY_URL))
+    dir.Append(Function(DirectoryItem(ListItems, "Drama"), url = DRAMA_URL))
+    dir.Append(Function(DirectoryItem(ListItems, "Horror"), url = HORROR_URL))
+    dir.Append(Function(DirectoryItem(ListItems, "Thriller"), url = THRILLER_URL))
+    dir.Append(Function(DirectoryItem(ListItems, "TV"), url = TV_URL))
     dir.Append(Function(InputDirectoryItem(SearchMenu, "Search", "Please enter the name of the title to search...", thumb=R(ICON_SEARCH))))
     
     # Preferences
@@ -55,7 +60,7 @@ def SearchMenu(sender, query=None):
 ####################################################################################################
 
 def ListItems(sender, url, replaceParent = False):
-    dir = MediaContainer(viewGroup = 'InfoList', title2 = sender.itemTitle, thumb = R(ICON), replaceParent = replaceParent)
+    dir = MediaContainer(viewGroup = 'InfoList', title2 = sender.itemTitle, replaceParent = replaceParent)
     
     # Iterate over the film items located within the page...
     page = HTML.ElementFromURL(url)
@@ -123,7 +128,7 @@ def ListItems(sender, url, replaceParent = False):
     next = page.xpath("//li/a[contains(text(), 'Next >')]")
     if len(next) > 0:
         next_url = next[0].get('href')
-        dir.Append(Function(DirectoryItem(ListItems, "Next...", thumb = R(ICON)), url = next_url, replaceParent = True))
+        dir.Append(Function(DirectoryItem(ListItems, "Next..."), url = next_url, replaceParent = True))
     
     # Check to see if we've found anything
     if len(dir) == 0:
