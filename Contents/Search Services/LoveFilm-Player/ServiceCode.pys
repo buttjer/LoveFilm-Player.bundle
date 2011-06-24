@@ -1,0 +1,149 @@
+import re
+
+SEARCH_URL = 'http://www.lovefilm.com/browse/film/watch-online/subscription/?query=%s'
+
+TV = "^[^-]* - Series \d+.*"
+TV_BASIC = "^(?P<series_name>[^-]*) - Series (?P<series_number>\d+) - (?P<episode_name>.*)$"
+TV_PARTIAL = "^(?P<series_name>[^-]*) - Series (?P<series_number>\d+), Episode (?P<episode_number>\d+)$"
+TV_FULL = "^(?P<series_name>[^-]*) - Series (?P<series_number>\d+), Episode (?P<episode_number>\d+) - (?P<episode_name>.*)$"
+
+def Search(query):
+
+  # Compute the URL and download the HTML
+  url = SEARCH_URL % String.Quote(query)
+  page = HTML.ElementFromURL(url)
+  
+  # Create a container to hold the results
+  c = ObjectContainer()
+  for pageItem in page.xpath("//div[@id='film_listings']//div[@class='film_listing sd open fl_detail ']"):
+    try:
+
+        # Attempt to extract the details of the title from the page.
+        details = ParseItem(pageItem)
+
+        # We can perform a simple test against the original title. If it passes the TV regular expression, we must assume that
+        # it is actually an episode of a TV show, and therefore we can possibly extract more information out of the title, for
+        # example its series name, series number, episode number and episode name.
+        originalTitle = details['title']
+        if re.match(TV, originalTitle) == None:
+            c.add(MovieObject(
+                title = details['title'],
+                summary = details['summary'],
+                year = details['release_decade'],
+                rating = details['rating'],
+                thumb = details['cover_art'],
+                directors = details['directors'],
+                content_rating = details['certificate'],
+                url = details['url']))
+        else:
+
+            # There are currently two known formats for TV episode titles seen available on the LoveFilm-Player. Examples of
+            # these are as follows:
+            #  - "Cracker - Series 03, Episode 06 - True Romance, Part 1"
+            #  - "Peep Show - Series 01, Episode 01"
+            #  - "Cracker - Series 05 - Nine Eleven"
+        
+            title = originalTitle
+            show = None
+            season = None
+            index = None
+            index_name = None
+
+            try:
+                # We attempt to identify the longer, more detail instance first. If that fails, then we drop back to the more
+                # basic.
+                more_detailed = re.match(TV_FULL, originalTitle)
+                if more_detailed != None:
+                    more_detailed_dict = more_detailed.groupdict()
+                    if len(more_detailed_dict) > 0:
+                        show = more_detailed_dict['series_name']
+                        season = int(more_detailed_dict['series_number'])
+                        index = int(more_detailed_dict['episode_number'])
+                        index_name = more_detailed_dict['episode_name']
+                else:
+                    # We've failed to match the more detailed version of the title. We should try the partial one now.
+                    partial = re.match(TV_PARTIAL, originalTitle)
+                    if partial != None:
+                        partial_dict = partial.groupdict()
+                        if len(partial_dict) > 0:
+                            show = partial_dict['series_name']
+                            season = int(partial_dict['series_number'])
+                            index = int(partial_dict['episode_number'])
+                    else:
+                        # We've failed AGAIN, so we will try the last known format.
+                        basic = re.match(TV_BASIC, originalTitle)
+                        if basic != None:
+                            basic_dict = basic.groupdict()
+                            if len(basic_dict) > 0:
+                                show = basic_dict['series_name']
+                                season = int(basic_dict['series_number'])
+                                index_name = basic_dict['episode_name']
+            except:
+                # An error has occurred while attempting to extract the details of the episode. To be safe, we will just use
+                # the default values
+                Log.Exception("Error determining TV episode details")
+                pass
+
+            c.add(EpisodeObject(
+                title = title,
+                show = show,
+                season = season,
+                index = index,
+                summary = details['summary'],
+                rating = details['rating'],
+                thumb = details['cover_art'],
+                directors = details['directors'],
+                content_rating = details['certificate'],
+                url = details['url']))
+    except:
+      Log.Exception("Exception adding video result")
+      
+  return c
+
+# This helper method will attempt to parse the html contained within the given page and identify the know elements of interest. 
+# This includes the following: URL, Title, Summary, Release Decade, Rating, Cover Art, Directors, Actors, Certificate
+# These values are contained within the returned dictionary. If an error occurs while attempting to determine one of these, then
+# the dictionary is guaranteed to contain the key, but the value present will simply be None
+def ParseItem(pageItem):
+    details = {}
+
+    # Determine the URL and Title from the page.
+    details['url'] = pageItem.xpath(".//h2/a")[0].get('href')
+    details['title'] = pageItem.xpath(".//h2/a/text()")[0]
+
+    # [Optional]
+    details['summary'] = None
+    try: details['summary'] = pageItem.xpath(".//div[@class='read_more']/text()")[0]
+    except: pass
+
+    # [Optional]
+    details['release_decade'] = None
+    try: details['release_decade'] = int(pageItem.xpath(".//h2//span/text()")[0])
+    except: pass
+
+    # [Optional]
+    details['rating'] = None
+    try: details['rating'] = int(pageItem.xpath(".//li[@property='v:rating']")[0].get('content')) * 2
+    except: pass
+
+    # [Optional]
+    details['cover_art'] = None
+    try: details['cover_art'] = pageItem.xpath(".//img")[0].get('src')
+    except: pass
+
+    # [Optional]
+    details['directors'] = None
+    try: details['directors'] = [item.strip() for item in pageItem.xpath(".//div[contains(text(), 'Director: ')]/a/text()") ]
+    except: pass
+
+    # [Optional]
+    details['staring'] = None
+    try: details['staring'] = [item.strip() for item in pageItem.xpath(".//div[contains(text(), 'Starring: ')]/a/text()") ]
+    except: pass
+
+    # [Optional]
+    details['certificate'] = None
+    try: details['certificate'] = pageItem.xpath(".//div[@class='certif']/img")[0].get('alt')
+    except: pass
+
+    return details
