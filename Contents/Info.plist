@@ -28,5 +28,9 @@
 	<array>
 		<string>GB</string>
 	</array>
+	<dict>
+	   <key>LoveFilm-Player</key>
+	   <string>com.plexapp.search.lovefilm-player</string>
+	</dict>
   </dict>
 </plist>
