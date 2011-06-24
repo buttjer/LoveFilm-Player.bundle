@@ -28,6 +28,7 @@
 	<array>
 		<string>GB</string>
 	</array>
+	<key>PlexSearchServices</key>
 	<dict>
 	   <key>LoveFilm-Player</key>
 	   <string>com.plexapp.search.lovefilm-player</string>
