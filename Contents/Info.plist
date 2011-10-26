@@ -33,5 +33,12 @@
 	   <key>LoveFilm-Player</key>
 	   <string>com.plexapp.search.lovefilm-player</string>
 	</dict>
+	<key>PlexClientCapabilities</key>
+	<dict>
+		<key>protocols</key>
+		<array>
+			<string>webkit</string>
+		</array>
+	</dict>
   </dict>
 </plist>
