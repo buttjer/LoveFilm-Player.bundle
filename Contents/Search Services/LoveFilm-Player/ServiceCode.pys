@@ -7,6 +7,8 @@ TV_BASIC = "^(?P<series_name>[^-]*) - Series (?P<series_number>\d+) - (?P<episod
 TV_PARTIAL = "^(?P<series_name>[^-]*) - Series (?P<series_number>\d+), Episode (?P<episode_number>\d+)$"
 TV_FULL = "^(?P<series_name>[^-]*) - Series (?P<series_number>\d+), Episode (?P<episode_number>\d+) - (?P<episode_name>.*)$"
 
+ObjectContainer.art = R('art-default.jpg')
+
 def Search(query):
 
   # Compute the URL and download the HTML
@@ -27,14 +29,14 @@ def Search(query):
         originalTitle = details['title']
         if re.match(TV, originalTitle) == None:
             c.add(MovieObject(
+                url = details['url'],
                 title = details['title'],
                 summary = details['summary'],
                 year = details['release_decade'],
                 rating = details['rating'],
-                thumb = details['cover_art'],
-                directors = details['directors'],
+                thumb = Callback(GetThumb, thumb_url = details['thumb']),
                 content_rating = details['certificate'],
-                url = details['url']))
+                directors = details['directors']))
         else:
 
             # There are currently two known formats for TV episode titles seen available on the LoveFilm-Player. Examples of
@@ -85,60 +87,53 @@ def Search(query):
                 pass
 
             c.add(EpisodeObject(
+                url = details['url'],
                 title = title,
                 show = show,
                 season = season,
                 index = index,
                 summary = details['summary'],
+                thumb = Callback(GetThumb, thumb_url = details['thumb']),
                 rating = details['rating'],
-                thumb = details['cover_art'],
-                directors = details['directors'],
-                content_rating = details['certificate'],
-                url = details['url']))
+                directors = details['directors']))
     except:
       Log.Exception("Exception adding video result")
       
   return c
 
-# This helper method will attempt to parse the html contained within the given page and identify the know elements of interest. 
-# This includes the following: URL, Title, Summary, Release Decade, Rating, Cover Art, Directors, Actors, Certificate
-# These values are contained within the returned dictionary. If an error occurs while attempting to determine one of these, then
-# the dictionary is guaranteed to contain the key, but the value present will simply be None
-def ParseItem(pageItem):
+####################################################################################################
+
+def ParseItem(item):
     details = {}
 
-    # Determine the URL and Title from the page.
-    details['url'] = pageItem.xpath(".//h2/a")[0].get('href')
-    details['title'] = pageItem.xpath(".//h2/a/text()")[0]
+    details['url'] = item.xpath(".//h2/a")[0].get('href').replace('http://','https://')
+    details['title'] = item.xpath(".//h2/a/text()")[0]
 
     # [Optional]
     details['summary'] = None
-    try: details['summary'] = pageItem.xpath(".//div[@class='read_more']/text()")[0]
+    try: details['summary'] = item.xpath(".//div[@class='read_more']/text()")[0]
     except: pass
 
     # [Optional]
     details['release_decade'] = None
-    try: details['release_decade'] = int(pageItem.xpath(".//h2//span/text()")[0])
+    try: 
+        release_decade_text = item.xpath(".//h2//span/text()")[0]
+        details['release_decade'] = int(re.match("\((?P<year>[0-9]+)\)", release_decade_text).groupdict()['year'])
     except: pass
 
     # [Optional]
     details['rating'] = None
-    try: details['rating'] = int(pageItem.xpath(".//li[@property='v:rating']")[0].get('content')) * 2
+    try: details['rating'] = float(item.xpath(".//li[@property='v:rating']")[0].get('content')) * 2
     except: pass
 
     # [Optional]
-    details['cover_art'] = None
-    try: details['cover_art'] = pageItem.xpath(".//img")[0].get('src')
+    details['thumb'] = None
+    try: details['thumb'] = item.xpath(".//img")[0].get('src')
     except: pass
 
     # [Optional]
-    details['directors'] = None
-    try: details['directors'] = [item.strip() for item in pageItem.xpath(".//div[contains(text(), 'Director: ')]/a/text()") ]
-    except: pass
-
-    # [Optional]
-    details['staring'] = None
-    try: details['staring'] = [item.strip() for item in pageItem.xpath(".//div[contains(text(), 'Starring: ')]/a/text()") ]
+    details['directors'] = []
+    try: details['directors'] = [item.strip() for item in item.xpath(".//div[contains(text(), 'Director: ')]/a/text()") ]
     except: pass
 
     # [Optional]
@@ -147,3 +142,18 @@ def ParseItem(pageItem):
     except: pass
 
     return details
+
+####################################################################################################
+
+def GetThumb(thumb_url):
+    try:
+        large_thumb = thumb_url[:thumb_url.rfind('-') + 1] + 'large.jpg'
+        data = HTTP.Request(large_thumb, cacheTime = CACHE_1MONTH).content
+        return DataObject(data, 'image/jpeg')
+    except:
+        try:
+            medium_thumb = thumb_url[:thumb_url.rfind('-') + 1] + 'medium.jpg'
+            data = HTTP.Request(medium_thumb, cacheTime = CACHE_1MONTH).content
+            return DataObject(data, 'image/jpeg')
+        except:
+            return Redirect(thumb_url)
