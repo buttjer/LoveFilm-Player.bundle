@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <site site="https://www.lovefilm.com/"
     agent="Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10.6; en-US; rv:1.9.2.12) Gecko/20101026 Firefox/3.6.12"
-    plugin="https://www.lovefilm.com/.*"
+    plugin="silverligh"
     initialState="wait-for-frame-load"
     version="1.0"
     identifier="com.plexapp.plugins.lovefilm-player"
@@ -44,28 +44,13 @@
             </action>
         </event>
         <event>
-            <!-- If we *do* need to login, visit the login url and attempt to submit it -->
+            <!-- If we *do* need to login, try to login -->
             <condition>
                 <condition name="need-to-login" />
             </condition>
             <action>
-                <visit url="https://www.lovefilm.com/visitor/login.html" />
-                <goto state="try-to-login"/>
-            </action>
-        </event>
-    </state>
-
-    <!-- Try to login -->
-    <state name="try-to-login">
-        <event>
-            <condition>
-                <!-- No condition required -->
-                <javascript script="true ? 1 : 0" matches="1" />
-            </condition>
-            <action>
-                <run script="var form = document.getElementById('typical'); form.email.value = '${username}'; form.password.value = '${password}'; form.submit();" />
-                <pause time="2000" />
-                <visit url="${url}" />
+                <run script="var url='https://www.lovefilm.com/ajax/member/login.html';var data={email:'${username}',password:'${password}', unique_id:'0', product_identifier:'0', faceted_release:'0'};jQuery.post(url,data,function(data){window.location.href=&quot;${url}&quot;});" />
+                <pause time="5000" />
                 <goto state="check-for-auth-again" />
             </action>
         </event>
@@ -94,18 +79,19 @@
             </action>
         </event>
     </state>
-
+    
     <!-- Click To Start -->
     <state name="click_to_start">
         <event>
             <condition>
-                <javascript script="true ? 1 : 0" matches="1" />
+                <javascript script="slPlugin.IsLoaded ? 1 : 0" matches="1" />
             </condition>
             <action>
                 <lockPlugin />
-                <pause time="5000" />
-                <click x="100" y="100" />
-                <click x="300" y="252"/>
+                <pause time="1000" />
+                <click x="300" y="252" skipMouseUp="true" />
+                <pause time="1000" />
+                <click x="300" y="252" />
                 <goto state="playing" />
             </action>
         </event>
@@ -123,7 +109,7 @@
                 <!-- the player's controls visible. Once this is done, we can then -->
                 <!-- send the actual click to the pause/play button -->
                 <click x="100" y="100" />
-                <click x="25" y="285"/>
+                <click x="25" y="285" />
 				<goto state="paused" />
         	</action>
     	</event>
@@ -140,7 +126,7 @@
                 <!-- the player's controls visible. Once this is done, we can then -->
                 <!-- send the actual click to the pause/play button -->
                 <click x="100" y="100" />
-                <click x="25" y="285"/>
+                <click x="25" y="285" />
 				<goto state="playing" />
 			</action>
 		</event>
