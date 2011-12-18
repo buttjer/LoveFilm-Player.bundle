@@ -104,19 +104,19 @@
     <!-- Playing -->
     <state name="playing">
         <event>
-        	<condition>
-				<command name="pause" />
-			</condition>
-
-        	<action>
+            <condition>
+                <command name="pause" />
+            </condition>
+            <action>
                 <!-- We send a click to somewhere on the player in order to make -->
                 <!-- the player's controls visible. Once this is done, we can then -->
                 <!-- send the actual click to the pause/play button -->
-                <click x="100" y="100" />
+                <click x="25" y="285" skipMouseUp="true" />
+                <pause time="500" />
                 <click x="25" y="285" />
-				<goto state="paused" />
-        	</action>
-    	</event>
+                <goto state="paused" />
+            </action>
+        </event>
     </state>
     
     <!-- Paused -->
@@ -129,7 +129,8 @@
                 <!-- We send a click to somewhere on the player in order to make -->
                 <!-- the player's controls visible. Once this is done, we can then -->
                 <!-- send the actual click to the pause/play button -->
-                <click x="100" y="100" />
+                <click x="25" y="285" skipMouseUp="true" />
+                <pause time="500" />
                 <click x="25" y="285" />
 				<goto state="playing" />
 			</action>
