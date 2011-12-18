@@ -88,10 +88,14 @@
             </condition>
             <action>
                 <lockPlugin />
-                <pause time="1000" />
+                <pause time="2000" />
                 <click x="300" y="252" skipMouseUp="true" />
                 <pause time="1000" />
                 <click x="300" y="252" />
+                <pause time="1000" />
+                <click x="100" y="180" skipMouseUp="true" />
+                <pause time="1000" />
+                <click x="100" y="180" />
                 <goto state="playing" />
             </action>
         </event>
