@@ -17,6 +17,8 @@
     <string>1.0</string>
     <key>PlexPluginMode</key>
     <string>AlwaysOn</string>
+    <key>PlexClientPlatforms</key>
+    <string>*</string>
     <key>PlexFrameworkVersion</key>
     <string>2</string>
 	<key>PlexMediaContainer</key>
