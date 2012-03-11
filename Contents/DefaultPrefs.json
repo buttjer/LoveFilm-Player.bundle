@@ -11,5 +11,15 @@
         "label": "Password",
         "default": "",
         "option": "hidden" 
+    },
+    {
+        "id": "site",
+        "type": "enum",
+        "label": "Regional Site",
+        "values": [
+            "UK",
+            "DE"
+        ],
+        "default": "UK"
     }
 ]

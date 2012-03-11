@@ -8,13 +8,46 @@ ART = 'art-default.jpg'
 ICON = 'icon-default.png'
 ICON_SEARCH = 'icon-search.png'
 
-ACTION_URL = 'http://www.lovefilm.com/browse/film/watch-online/subscription/action/?rows=50'
-CHILDREN_URL = 'http://www.lovefilm.com/browse/film/watch-online/subscription/childrens/?rows=50'
-COMEDY_URL = 'http://www.lovefilm.com/browse/film/watch-online/subscription/comedy/?rows=50'
-DRAMA_URL = 'http://www.lovefilm.com/browse/film/watch-online/subscription/drama/?rows=50'
-HORROR_URL = 'http://www.lovefilm.com/browse/film/watch-online/subscription/horror/?rows=50'
-THRILLER_URL = 'http://www.lovefilm.com/browse/film/watch-online/subscription/thriller/?rows=50'
-TV_URL = 'http://www.lovefilm.com/browse/film/watch-online/subscription/television/?rows=50'
+
+UK_URLS = [
+    ('Action/Adventure', 'http://www.lovefilm.com/browse/film/watch-online/subscription/action/?rows=50'),
+    ('Animated', 'http://www.lovefilm.com/browse/film/watch-online/subscription/animated/?rows=50'),
+    ('Bollywood', 'http://www.lovefilm.com/browse/film/watch-online/subscription/bollywood/?rows=50'),
+    ('Children', 'http://www.lovefilm.com/browse/film/watch-online/subscription/childrens/?rows=50'),
+    ('Documentary', 'http://www.lovefilm.com/browse/film/watch-online/subscription/documentaries/?rows=50'),
+    ('Drama', 'http://www.lovefilm.com/browse/film/watch-online/subscription/drama/?rows=50'),
+    ('Family', 'http://www.lovefilm.com/browse/film/watch-online/subscription/family/?rows=50'),
+    ('Horror', 'http://www.lovefilm.com/browse/film/watch-online/subscription/horror/?rows=50'),
+    ('Music/Musical', 'http://www.lovefilm.com/browse/film/watch-online/subscription/music/?rows=50'),
+    ('Romance', 'http://www.lovefilm.com/browse/film/watch-online/subscription/romance/?rows=50'),
+    ('Sci-Fi/Fantasy', 'http://www.lovefilm.com/browse/film/watch-online/subscription/sci-fi/?rows=50'),
+    ('Special Interest', 'http://www.lovefilm.com/browse/film/watch-online/subscription/special-interest/?rows=50'),
+    ('Sport', 'http://www.lovefilm.com/browse/film/watch-online/subscription/sport/?rows=50'),
+    ('Teen', 'http://www.lovefilm.com/browse/film/watch-online/subscription/Teen/?rows=50'),
+    ('Television', 'http://www.lovefilm.com/browse/film/watch-online/subscription/television/?rows=50'),
+    ('Thriller', 'http://www.lovefilm.com/browse/film/watch-online/subscription/thriller/?rows=50'),
+    ('World Cinema', 'http://www.lovefilm.com/browse/film/watch-online/subscription/world-cinema/?rows=50')]
+
+DE_URLS = [
+    ('Action und Abenteuer', 'http://www.lovefilm.de/browse/filme/video-on-demand/teil-des-ausleihpaketes/action-und-abenteuer/?rows=50'),
+    ('Bollywood', 'http://www.lovefilm.de/browse/filme/video-on-demand/teil-des-ausleihpaketes/bollywood/?rows=50'),
+    ('Dokumentation', 'http://www.lovefilm.de/browse/filme/video-on-demand/teil-des-ausleihpaketes/dokus/?rows=50'),
+    ('Drama', 'http://www.lovefilm.de/browse/filme/video-on-demand/teil-des-ausleihpaketes/drama/?rows=50'),
+    ('Fernsehen', 'http://www.lovefilm.de/browse/filme/video-on-demand/teil-des-ausleihpaketes/tv-serien/?rows=50'),
+    ('Horror', 'http://www.lovefilm.de/browse/filme/video-on-demand/teil-des-ausleihpaketes/horror/?rows=50'),
+    ('Kinderfilm', 'http://www.lovefilm.de/browse/filme/video-on-demand/teil-des-ausleihpaketes/kinderfilme/?rows=50'),
+    ('Komodie', 'http://www.lovefilm.de/browse/filme/video-on-demand/teil-des-ausleihpaketes/komoedien/?rows=50'),
+    ('Kriegsfilm', 'http://www.lovefilm.de/browse/filme/video-on-demand/teil-des-ausleihpaketes/kriegsfilme/?rows=50'),
+    ('Kriminalfilm', 'http://www.lovefilm.de/browse/filme/video-on-demand/teil-des-ausleihpaketes/krimis/?rows=50'),
+    ('Liebesfilm', 'http://www.lovefilm.de/browse/filme/video-on-demand/teil-des-ausleihpaketes/liebesfilme/?rows=50'),
+    ('Musik', 'http://www.lovefilm.de/browse/filme/video-on-demand/teil-des-ausleihpaketes/musik/?rows=50'),
+    ('Ratgeber und Bildung', 'http://www.lovefilm.de/browse/filme/video-on-demand/teil-des-ausleihpaketes/ratgeber-bildung/?rows=50'),
+    ('Science Fiction und Fantasy', 'http://www.lovefilm.de/browse/filme/video-on-demand/teil-des-ausleihpaketes/science-fiction/?rows=50'),
+    ('Thriller', 'http://www.lovefilm.de/browse/filme/video-on-demand/teil-des-ausleihpaketes/thriller/?rows=50'),
+    ('Western', 'http://www.lovefilm.de/browse/filme/video-on-demand/teil-des-ausleihpaketes/western/?rows=50'),
+    ('Zeichentrick', 'http://www.lovefilm.de/browse/filme/video-on-demand/teil-des-ausleihpaketes/cartoons/?rows=50')]
+
+URLS = { "UK": UK_URLS, "DE": DE_URLS }
 
 TV = "^[^-]* - Series \d+.*"
 TV_BASIC = "^(?P<series_name>[^-]*) - Series (?P<series_number>\d+) - (?P<episode_name>.*)$"
@@ -41,15 +74,13 @@ def Start():
 ####################################################################################################
 
 def MainMenu():
-    oc = ObjectContainer()
-    
-    oc.add(DirectoryObject(key = Callback(ListItems, url = ACTION_URL, container_title = "Action"), title = "Action"))
-    oc.add(DirectoryObject(key = Callback(ListItems, url = CHILDREN_URL, container_title = "Children"), title = "Children"))
-    oc.add(DirectoryObject(key = Callback(ListItems, url = COMEDY_URL, container_title = "Comedy"), title = "Comedy"))
-    oc.add(DirectoryObject(key = Callback(ListItems, url = DRAMA_URL, container_title = "Drama"), title = "Drama"))
-    oc.add(DirectoryObject(key = Callback(ListItems, url = HORROR_URL, container_title = "Horror"), title = "Horror"))
-    oc.add(DirectoryObject(key = Callback(ListItems, url = THRILLER_URL, container_title = "Thriller"), title = "Thriller"))
-    oc.add(DirectoryObject(key = Callback(ListItems, url = TV_URL, container_title = "TV"), title = "TV"))
+    oc = ObjectContainer(no_cache = True)
+
+    Log("QWERTY")
+    Log(Prefs['site'])
+
+    for (name, url) in URLS[Prefs['site']]:
+        oc.add(DirectoryObject(key = Callback(ListItems, url = url, container_title = name), title = name))
     oc.add(SearchDirectoryObject(identifier="com.plexapp.search.lovefilm-player", title = "Search", prompt = "Please enter the name of the title to search..."))
     
     # Preferences
@@ -68,7 +99,6 @@ def ListItems(url, container_title, replace_parent = False):
     
         details = ParseItem(pageItem)
         originalTitle = details['title']
-        Log("IABI: " + originalTitle)
         
         if re.match(TV, originalTitle) == None:
             oc.add(MovieObject(
