@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<site site="https://www.lovefilm.de/"
+    agent="Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10.6; en-US; rv:1.9.2.12) Gecko/20101026 Firefox/3.6.12"
+    plugin="silverligh"
+    initialState="wait-for-frame-load"
+    version="1.0"
+    identifier="com.plexapp.plugins.lovefilm-player"
+    manualLock="true">
+
+    <!-- The condition we use several times from within states to check if we're logged in or not -->
+    <condition name="need-to-login">
+        <and>
+            <!-- Check if a specific element exists in the page -->
+            <!-- Returns true if we need to login -->
+            <javascript script="document.cookie.indexOf('cache_key=0/lovefilm')" matches="-1" />
+        </and>
+    </condition>
+
+    <!-- Wait for frame to load -->
+    <state name="wait-for-frame-load">
+        <event>
+            <condition>
+                <!-- Wait for the DOM to load... -->
+                <frameLoaded />
+            </condition>
+            <action>
+                <!-- ...then goto the 'check-for-auth' state -->
+                <goto state="check-for-auth" />
+            </action>
+        </event>
+    </state>
+
+    <!-- Check for auth -->
+    <state name="check-for-auth">
+        <event>
+            <condition>
+                <!-- If we don't need to login, goto state 'playing' -->
+                <not>
+                    <condition name="need-to-login" />
+                </not>
+            </condition>
+            <action>
+                <goto state="click_to_start" />
+            </action>
+        </event>
+        <event>
+            <!-- If we *do* need to login, try to login -->
+            <condition>
+                <condition name="need-to-login" />
+            </condition>
+            <action>
+                <run script="var url='https://www.lovefilm.de/ajax/member/login.html';var data={email:'${username}',password:'${password}', unique_id:'0', product_identifier:'0', faceted_release:'0'};jQuery.post(url,data,function(data){window.location.href=&quot;${url}&quot;});" />
+                <pause time="5000" />
+                <goto state="check-for-auth-again" />
+            </action>
+        </event>
+    </state>
+    
+    <!-- Check for auth again -->
+    <state name="check-for-auth-again">
+        <event>
+            <condition>
+                <!-- If login was successful we should now not need to login and can go to the state 'cleanup' -->
+                <not>
+                    <condition name="need-to-login" />
+                </not>
+            </condition>
+            <action>
+                <goto state="click_to_start" />
+            </action>
+        </event>
+        <event>
+            <condition>
+                <!-- If we still need to login after we've tried to login, something is wrong... -->
+                <condition name="need-to-login" />
+            </condition>
+            <action>
+                <goto state="end" param="Please check your username and password in the plugin's settings" />
+            </action>
+        </event>
+    </state>
+    
+    <!-- Click To Start -->
+    <state name="click_to_start">
+        <event>
+            <condition>
+                <javascript script="slPlugin.IsLoaded ? 1 : 0" matches="1" />
+            </condition>
+            <action>
+                <lockPlugin />
+                <pause time="2000" />
+                <click x="300" y="252" skipMouseUp="true" />
+                <pause time="1000" />
+                <click x="300" y="252" />
+                <pause time="1000" />
+                <click x="100" y="180" skipMouseUp="true" />
+                <pause time="1000" />
+                <click x="100" y="180" />
+                <goto state="playing" />
+            </action>
+        </event>
+    </state>
+
+    <!-- Playing -->
+    <state name="playing">
+        <event>
+            <condition>
+                <command name="pause" />
+            </condition>
+            <action>
+                <!-- We send a click to somewhere on the player in order to make -->
+                <!-- the player's controls visible. Once this is done, we can then -->
+                <!-- send the actual click to the pause/play button -->
+                <click x="25" y="285" skipMouseUp="true" />
+                <pause time="500" />
+                <click x="25" y="285" />
+                <goto state="paused" />
+            </action>
+        </event>
+    </state>
+    
+    <!-- Paused -->
+	<state name="paused">
+		<event>
+			<condition>
+				<command name="play" />
+			</condition>
+			<action>
+                <!-- We send a click to somewhere on the player in order to make -->
+                <!-- the player's controls visible. Once this is done, we can then -->
+                <!-- send the actual click to the pause/play button -->
+                <click x="25" y="285" skipMouseUp="true" />
+                <pause time="500" />
+                <click x="25" y="285" />
+				<goto state="playing" />
+			</action>
+		</event>
+	</state>
+
+</site>
