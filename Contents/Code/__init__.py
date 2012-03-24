@@ -76,12 +76,12 @@ def Start():
 def MainMenu():
     oc = ObjectContainer(no_cache = True)
 
-    Log("QWERTY")
-    Log(Prefs['site'])
-
     for (name, url) in URLS[Prefs['site']]:
         oc.add(DirectoryObject(key = Callback(ListItems, url = url, container_title = name), title = name))
-    oc.add(SearchDirectoryObject(identifier="com.plexapp.search.lovefilm-player", title = "Search", prompt = "Please enter the name of the title to search..."))
+
+    # We currently only support searching for the UK site
+    if Prefs['site'] == "UK":   
+        oc.add(SearchDirectoryObject(identifier="com.plexapp.search.lovefilm-player", title = "Search", prompt = "Please enter the name of the title to search..."))
     
     # Preferences
     oc.add(PrefsObject(title = L('Preferences')))
