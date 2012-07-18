@@ -81,7 +81,7 @@ def MainMenu():
 
     # We currently only support searching for the UK site
     if Prefs['site'] == "UK":   
-        oc.add(SearchDirectoryObject(identifier="com.plexapp.search.lovefilm-player", title = "Search", prompt = "Please enter the name of the title to search..."))
+        oc.add(SearchDirectoryObject(identifier="com.plexapp.plugins.lovefilm-player", title = "Search", prompt = "Please enter the name of the title to search..."))
     
     # Preferences
     oc.add(PrefsObject(title = L('Preferences')))
