@@ -107,7 +107,7 @@ def ListItems(url, container_title, replace_parent = False):
                 summary = details['summary'],
                 year = details['release_decade'],
                 rating = details['rating'],
-                thumb = Callback(GetThumb, thumb_url = details['thumb']),
+                thumb = Resource.ContentsOfURLWithFallback(GetThumbList(details['thumb']), fallback = ICON),
                 content_rating = details['certificate'],
                 directors = details['directors']))
     
@@ -166,7 +166,7 @@ def ListItems(url, container_title, replace_parent = False):
                 season = season,
                 index = index,
                 summary = details['summary'],
-                thumb = Callback(GetThumb, thumb_url = details['thumb']),
+                thumb = Resource.ContentsOfURLWithFallback(GetThumbList(details['thumb']), fallback = ICON),
                 rating = details['rating'],
                 directors = details['directors']))
                     
@@ -227,15 +227,9 @@ def ParseItem(item):
 
 ####################################################################################################
 
-def GetThumb(thumb_url):
-    try:
-        large_thumb = thumb_url[:thumb_url.rfind('-') + 1] + 'large.jpg'
-        data = HTTP.Request(large_thumb, cacheTime = CACHE_1MONTH).content
-        return DataObject(data, 'image/jpeg')
-    except:
-        try:
-            medium_thumb = thumb_url[:thumb_url.rfind('-') + 1] + 'medium.jpg'
-            data = HTTP.Request(medium_thumb, cacheTime = CACHE_1MONTH).content
-            return DataObject(data, 'image/jpeg')
-        except:
-            return Redirect(thumb_url)
+def GetThumbList(thumb_url):
+    return [
+        thumb_url[:thumb_url.rfind('-') + 1] + 'large.jpg',
+        thumb_url[:thumb_url.rfind('-') + 1] + 'medium.jpg',
+        thumb_url
+    ]
